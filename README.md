@@ -1,1 +1,0 @@
-# purunomo.github.io
