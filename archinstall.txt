@@ -1,0 +1,222 @@
+setfont ter-132n
+
+check internet connection
+wifi
+iwctl
+station wlan0 connect-hidden "name"
+exit
+ping
+
+partitioning
+lsblk
+4parts efi swap root home
+gdisk or fdisk
+gdisk
+1. efi
+250M
+ef00
+
+2. swap
+512M
+8200
+
+3. rot
+50G
+default
+
+4. home
+default
+default
+
+w to write
+lsblk
+
+format partition
+mkfs.vfat /dev/sda1
+mkswap /dev/sda2
+swapon /dev/sda2
+mkfs.ext4 /dev/sda3
+mkfs.ext /dev/sda4
+lsblk
+
+mounting partition
+mount /dev/sda3 /mnt
+mkdir -p /mnt/boot/efi
+mkdir /mnt/home
+mount /dev/sda1 /mnt/boot/efi
+mount /dev/sda4 /mnt/home
+lsblk
+
+installing base
+pacstrap /mnt base linux linux-firmware git vim intel-ucode
+
+generate fstab
+genfstab -U /mnt >> /mnt/etc/fstab
+
+chrooting
+arch-chroot /mnt
+
+base configuration
+ln -sf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+hwclock --systohc
+uncomment us and id locale in /etc/locale.gen
+locale-gen
+echo "LANG=en_US.UTF-8" >> /etc/locale.conf
+echo "sugepc" >> /etc/hostname
+echo "127.0.0.1 localhost" >> /etc/hosts
+echo "::1	localhost" >> /etc/hosts
+echo "127.0.1.1 sugepc.localdomain sugepc" >> etc/hosts
+
+installing basic package
+efibootmgr
+networkmanager
+network-manager-applet
+dialog
+wpa_supplicant
+mtools
+dosfstools
+reflector
+base-devel
+linux-headers
+avahi
+gvfs
+gvfs-smb
+nfs-utils
+inetutils
+dnsutils
+bluez
+bluez-utils
+alsa-utils
+pulseaudio
+pavucontrol
+bash-completion
+rsync
+reflector
+acpi
+acpi_call
+virt-manager
+qemu
+qemu-arch-extra
+edk2-ovmf
+bridge-utils
+dnsmasq
+vde2
+openbsd-netcat
+iptables-nft
+ipset
+firewalld
+flatpak
+sof-firmware
+nss-mdns
+acpid
+ntfs-3g
+terminus-font
+xf86-video-intel
+
+installing bootloader
+bootctl --path=/boot install
+cd /boot
+ls
+cd loader
+ls
+vim loader.conf
+change the numbers to arch
+save
+cd entries
+vim arch.conf
+title	Arch Linux
+linux	/vmlinuz-linux
+initrd	/initramfs-linux.img
+options	root=/dev/sda3 rw
+save
+
+
+enabling services
+NetworkManager
+bluetooth
+sshd
+avahi-daemon
+reflector.timer
+fstrim.timer
+libvirtd
+firewalld
+acpid
+
+adding user
+useradd -m aji
+passwd aji
+usermod -aG libvirt aji
+
+changing sudoers config or just do this
+echo "aji ALL=(ALL) ALL" >> /etc/sudoers.d/aji
+
+exit chroot
+umount -a
+reboot
+
+check int connection
+nmtui
+ping
+
+configure time
+sudo timedatectl set-ntp true
+sudo hwclock --systohc
+
+conf reflector
+sudo reflector -c Indonesia -a 12 --sort rate --save /etc/pacman.d/mirrorlist
+sudo pacman -Sy
+
+conf firewall
+sudo firewall-cmd --add-port=1025-65535/tcp --permanent
+sudo firewall-cmd --add-port=1025-65535/udp --permanent
+sudo firewall-cmd --reload
+
+install polkit-gnome (there are other options)
+
+install xorg nitrogen thunar picom firefox arc-gtk-theme arc-icon-theme vlc ttf-font-awesome
+
+installling dwm
+try to move a custom dir
+git clone git://git.suckless.org/dmenu
+dwm
+dwmstatus
+st
+slock
+cd to each dir
+make
+sudo make install
+do those steps for others
+
+create a desktop file
+cd /usr/share/
+sudo mkdir xsessions
+cd
+sudo vim dwm.desktop
+[Desktop Entry]
+Encoding=UTF-8
+Name=Dwm
+Comment=Dynamic window manager
+Exec=dwm
+Icon=dwm
+Type=XSession
+save
+
+install display manager
+git clone https://aur.archlinux.org/ly
+cd
+makepkg -si
+sudo systemctl enable ly
+
+vim .xprofile
+nitrogen --restore
+picom -f
+xrandr --output eDP1 --brightness 0.5
+save
+
+reboot
+
+lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings lxappearance
+systemctl enable lightdm
+
+
+

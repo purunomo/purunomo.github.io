@@ -1,0 +1,424 @@
+<html>
+	<head>
+		<title>[purunomo's]</title>
+		<style>
+			/*global background*/
+			html {
+				background: #0e100c;
+				color: #c0ceaf;
+			}
+			/* Add a black background color to the top navigation*/
+			.topnav {
+				background-color: #333;
+				overflow: hidden;
+				position: fixed;
+				top: 0;
+				left: 0;
+				display: block;
+				width: 100%;
+			}
+
+			/*links inside the navbar*/
+			.topnav a {
+				float: left;
+				color: #f2f2f2;
+				text-align: center;
+				padding: 14px 16px;
+				text-decoration: none;
+				font-size: 17px;
+				height: 20px;
+			}
+
+			/*hover links*/
+			.topnav a:hover {
+				background-color: #ddd;
+				color: black;
+			}
+
+			/*active link*/
+			.topnav a.active {
+				background-color: #04AA6D;
+				color: white;
+			}
+			body {
+				margin: 60px;
+				padding: 2px;
+				font-size: 17px;
+			}
+			body a {
+				text-decoration: none;
+				color: #5baacc;
+			}
+			kbd {
+				color: #949be1;
+			}
+
+		</style>
+	</head>
+
+	<body>
+		<div class="topnav">
+			<a class="active" href="index.html">Home</a>
+			<a href="blogs.html">Blogs</a>
+			<a href="about.html">About</a>
+		</div>
+		<h3>Welcome to purunomo's</h3>
+		<ol>
+			<li><p>[Optional]Set a bigger font<br><kbd>setfont ter-132n</kbd></p>
+			</li>
+			<li><p>Checking internet connection<br>
+				<kbd>ping -c 3 archlinux.org</kbd><br>
+				For wifi, connect using <kbd>iwctl</kbd><br>
+				<kbd>station "dev" connect "ssid"</kbd><br>
+				Enter the passphrase if required, than <kbd>exit</kbd></p>
+			</li>
+			<li><p>	partitioning
+				<kbd>lsblk</kbd><br>
+					4parts efi swap root home<br>
+					gdisk or fdisk<br>
+					<kbd>gdisk</kbd></p>
+				<ol>
+					<li>
+						<p>
+						efi<br>
+						250M<br>
+						ef00
+						</p>
+					</li>
+					<li>
+						<p>
+						swap<br>
+						512M<br>
+						8200
+						</p>
+					</li>
+					<li>
+						<p>
+						root<br>
+						50G<br>
+						default
+						</p>
+					</li>
+					<li>
+						<p>
+						home<br>
+						default<br>
+						default<br>
+						</p>
+					</li>
+					<li>
+						<p>
+						<kbd>w</kbd> to write
+						</p>
+					</li>
+					<li>
+						<kbd>lsblk</kbd>
+					</li>
+				</ol>
+			</li>
+			<li>
+				<p>
+				format partition
+				</p>
+				<ol>
+					<li><kbd>mkfs.vfat /dev/sda1</kbd></li>
+					<li><kbd>mkswap /dev/sda2</kbd></li>
+					<li><kbd>swapon /dev/sda2</kbd></li>
+					<li><kbd>mkfs.ext4 /dev/sda3</kbd></li>
+					<li><kbd>mkfs.ext /dev/sda4</kbd></li>
+					<li><kbd>lsblk</kbd></li>
+				</ol>
+			</li>
+			<li>
+				<p>
+				mounting partition
+				</p>
+				<kbd>
+					mount /dev/sda3 /mnt
+				</kbd>
+				<br>
+				<kbd>
+					mkdir -p /mnt/boot/efi
+				</kbd>
+				<br>
+				<kbd>
+					mkdir /mnt/home
+				</kbd>
+				<br>
+				<kbd>
+					mount /dev/sda1 /mnt/boot/efi
+				</kbd>
+				<br>
+				<kbd>
+					mount /dev/sda4 /mnt/home
+				</kbd>
+				<br>
+				<kbd>
+					lsblk
+				</kbd>
+			</li>
+			<li>
+				<p>
+				installing base
+				</p>
+				<kbd>
+					pacstrap /mnt base linux linux-firmware git vim intel-ucode
+				</kbd>
+			</li>
+			<li>
+				<p>
+				generate fstab
+				</p>
+				<kbd>
+					genfstab -U /mnt >> /mnt/etc/fstab
+				</kbd>
+			</li>
+			<li>
+				<p>
+				<kbd>chroot</kbd> to the new system
+				</p>
+				<kbd>
+					arch-chroot /mnt
+				</kbd>
+			</li>
+			<li>
+				<p>
+				base configuration
+				</p>
+				<kbd>
+					ln -sf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+				</kbd>
+				<br>
+				<kbd>
+					hwclock --systohc
+				</kbd>
+				<br>
+				<kbd>
+					vim /etc/locale.gen
+				</kbd>
+				<br>
+				<kbd>
+					locale-gen
+				</kbd>
+				<br>
+				<kbd>
+					echo "LANG=en_US.UTF-8" >> /etc/locale.conf
+				</kbd>
+				<br>
+				<kbd>
+					echo "sugepc" >> /etc/hostname
+				</kbd>
+				<br>
+				<kbd>
+					echo "127.0.0.1 localhost" >> /etc/hosts
+				</kbd>
+				<br>
+				<kbd>
+					echo "::1	localhost" >> /etc/hosts
+				</kbd>
+				<br>
+				<kbd>
+					echo "127.0.1.1 sugepc.localdomain sugepc" >> etc/hosts
+				</kbd>
+			</li>
+			<li>
+				<p>
+				installing basic package
+				</p>
+				<kbd>
+					pacman -S efibootmgr networkmanager network-manager-applet dialog wpa_supplicant mtools dosfstools reflector base-devel linux-headers avahi gvfs gvfs-smb nfs-utils inetutils dnsutils bluez bluez-utils alsa-utils pulseaudio pavucontrol bash-completion rsync reflector acpi acpi_call virt-manager qemu qemu-arch-extra edk2-ovmf bridge-utils dnsmasq vde2 openbsd-netcat iptables-nft ipset firewalld flatpak sof-firmware nss-mdns acpid ntfs-3g terminus-font xf86-video-intel
+				</kbd>
+			</li>
+			<li>
+				<p>
+				installing bootloader
+				</p>
+				<kbd>
+					bootctl --path=/boot install
+				</kbd>
+				<br>
+				<kbd>
+					cd /boot
+				</kbd>
+				<br>
+				<kbd>
+					ls
+				</kbd>
+				<br>
+				<kbd>
+					cd loader
+				</kbd>
+				<br>
+				<kbd>
+					ls
+				</kbd>
+				<br>
+				<kbd>
+					vim loader.conf
+				</kbd>
+				<p>
+				change the numbers in the last line to arch
+				</p>
+				<kbd>
+					cd entries
+				</kbd>
+				<br>
+				<kbd>
+					vim arch.conf
+				</kbd>
+				<br>
+				<kbd>
+					title	Arch Linux
+				</kbd>
+				<br>
+				<kbd>
+					linux	/vmlinuz-linux
+				</kbd>
+				<br>
+				<kbd>
+					initrd	/initramfs-linux.img
+				</kbd>
+				<br>
+				<kbd>
+					options	root=/dev/sda3 rw
+				</kbd>
+			</li>
+			<li>
+				<p>
+				enabling services
+				</p>
+				<kbd>
+					systemctl enable 
+				</kbd>
+				<p>
+				for each of these services
+				</p>
+				<ul>
+					<li>
+						NetworkManager
+					</li>
+					<li>
+						bluetooth
+					</li>
+					<li>
+						sshd
+					</li>
+					<li>
+						avahi-daemon
+					</li>
+					<li>
+						reflector.timer
+					</li>
+					<li>
+						fstrim.timer
+					</li>
+					<li>
+						libvirtd
+					</li>
+					<li>
+						firewalld
+					</li>
+					<li>
+						acpid
+					</li>
+				</ul>
+			</li>
+			<li>
+				<p>
+				adding user
+				</p>
+				<kbd>
+					useradd -m aji
+				</kbd>
+				<br>
+				<kbd>
+					passwd aji
+				</kbd>
+				<br>
+				<kbd>
+					usermod -aG libvirt aji
+				</kbd>
+				<br>
+				<kbd>
+					echo "aji ALL=(ALL) ALL" >> /etc/sudoers.d/aji
+				</kbd>
+			</li>
+			<li>
+				<p>
+				exit chroot, unmount, and reboot
+				</p>
+			</li>
+			<li>
+				<p>
+				configuring time
+				</p>
+				<kbd>
+					sudo timedatectl set-ntp true
+				</kbd>
+				<br>
+				<kbd>
+					sudo hwclock --systohc
+				</kbd>
+			</li>
+		</ol>
+
+		<code>
+			conf reflector<br>
+sudo reflector -c Indonesia -a 12 --sort rate --save /etc/pacman.d/mirrorlist<br>
+sudo pacman -Sy<br>
+
+conf firewall<br>
+sudo firewall-cmd --add-port=1025-65535/tcp --permanent<br>
+sudo firewall-cmd --add-port=1025-65535/udp --permanent<br>
+sudo firewall-cmd --reload<br>
+<br>
+install polkit-gnome (there are other options)<br>
+<br>
+install xorg nitrogen thunar picom firefox arc-gtk-theme arc-icon-theme vlc ttf-font-awesome<br>
+<br>
+installling dwm<br>
+try to move a custom dir<br>
+git clone git://git.suckless.org/dmenu<br>
+dwm<br>
+dwmstatus<br>
+st<br>
+slock<br>
+cd to each dir<br>
+make<br>
+sudo make install<br>
+do those steps for others<br>
+<br>
+create a desktop file<br>
+cd /usr/share/<br>
+sudo mkdir xsessions<br>
+cd<br>
+sudo vim dwm.desktop<br>
+[Desktop Entry]<br>
+Encoding=UTF-8<br>
+Name=Dwm<br>
+Comment=Dynamic window manager<br>
+Exec=dwm<br>
+Icon=dwm<br>
+Type=XSession<br>
+save<br>
+<br>
+install display manager<br>
+git clone https://aur.archlinux.org/ly<br>
+cd<br>
+makepkg -si<br>
+sudo systemctl enable ly<br>
+<br>
+vim .xprofile<br>
+nitrogen --restore<br>
+picom -f<br>
+xrandr --output eDP1 --brightness 0.5<br>
+save<br>
+<br>
+reboot<br>
+<br>
+lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings lxappearance<br>
+systemctl enable lightdm<br>
+	</code>
+	</body>
+
+</html>
